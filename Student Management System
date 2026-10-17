@@ -1,0 +1,446 @@
+# ==========================================
+
+# STUDENT MANAGEMENT SYSTEM 
+
+# ==========================================
+
+from datetime import datetime
+
+student_list = []
+
+
+valid_prefixes = ["SE", "SS", "SA", "SB", "DE", "HE"]
+
+
+def inputStudentID(message):
+    while True:
+        student_id = input(message).strip().upper()
+
+        if len(student_id) != 8:
+            print("Invalid Student ID!")
+            print("ID must contain 8 characters.")
+
+        elif student_id[:2] not in valid_prefixes:
+            print("Invalid major code!")
+            print("Allowed prefixes:", valid_prefixes)
+
+        elif not (student_id[2:].isascii()
+                  and student_id[2:].isdigit()):
+            print("Invalid Student ID!")
+            print("The last 6 characters must be digits.")
+
+        else:
+            return student_id
+
+
+def inputName(message):
+    while True:
+        name = input(message).strip()
+
+        
+        check_name = name.replace(" ", "")
+        check_name = check_name.replace("-", "")
+        check_name = check_name.replace("'", "")
+        check_name = check_name.replace("’", "")
+
+        if name != "" and check_name.isalpha() and len(check_name) > 2:
+            return name
+        else:
+            print("Invalid name! Please enter a valid name.")
+            print("Full name must contain more than 2 letters.")
+
+
+
+def inputDateOfBirth(message):
+    while True:
+        date_of_birth = input(message).strip()
+
+        try:
+            dob = datetime.strptime(
+                date_of_birth, "%d/%m/%Y")
+
+            
+            if dob.strftime("%d/%m/%Y") != date_of_birth:
+                print("Please use DD/MM/YYYY format!")
+                continue
+
+            if dob.year >= 2009:
+                print("Year of birth must be before 2009!")
+                continue
+
+            if dob.date() > datetime.today().date():
+                print("Date of birth cannot be in the future!")
+                continue
+
+            return date_of_birth
+
+        except ValueError:
+            print("Invalid date!")
+            print("Example: 28/09/2007")
+
+
+
+def inputGender(message):
+    while True:
+        gender = input(message).strip().lower()
+
+        if gender == "male":
+            return "Male"
+        elif gender == "female":
+            return "Female"
+        else:
+            print("Please enter Male or Female.")
+
+
+
+def inputClassName(message):
+    while True:
+        class_name = input(message).strip().upper()
+
+        if (len(class_name) == 6
+                and class_name[:3].isalpha()
+                and class_name[:3].isascii()
+                and class_name[3:].isdigit()
+                and class_name[3:].isascii()):
+            return class_name
+        else:
+            print("Invalid class name!")
+            print("Class name must have 3 letters followed by 3 digits.")
+            print("Example: PFP191, CSI106, MAE101, ...")
+
+
+
+
+
+def inputPhone(message):
+    while True:
+        phone = input(message).strip()
+
+        if (phone.isascii()
+                and phone.isdigit()
+                and len(phone) == 10
+                and phone.startswith("0")):
+            return phone
+        else:
+            print("Invalid phone number!")
+            print("Phone must contain 10 digits and start with 0.")
+
+
+
+
+def inputEmail(message):
+    while True:
+        email = input(message).strip()
+
+        if (email == "" or " " in email or email.count("@") != 1 or ".." in email):
+            print("Invalid email!")
+            continue
+
+        parts = email.split("@")
+        local = parts[0]
+        domain = parts[1]
+        domain_parts = domain.split(".")
+
+        
+        if (local == "" or local.startswith(".") or local.endswith(".") or len(domain_parts) < 2):
+            print("Invalid email!")
+            print("Example: vtgh289@gmail.com, HanGHNSE234156@fpt.edu")
+            continue
+            
+          
+
+        
+        valid_domain = True
+
+        for part in domain_parts:
+            if part == "" or not part.replace("-", "").isalnum():
+                valid_domain = False
+
+        
+        for part in domain_parts:
+            if part.startswith("-") or part.endswith("-"):
+                valid_domain = False
+
+        
+        if not domain_parts[-1].isalpha():
+            valid_domain = False
+        elif len(domain_parts[-1]) < 2:
+            valid_domain = False
+
+        
+        valid_local = True
+
+        for char in local:
+            if not (char.isalnum() or char in "._%+-"):
+                valid_local = False
+
+        if valid_domain and valid_local:
+            return email
+        else:
+            print("Invalid email!")
+            print("Please enter a valid email address.")
+            print("Example: vtgh289@gmail.com, HanVTGSE123456@fpt.edu")
+        
+
+
+
+# ==========================================
+
+# 1. DISPLAY STUDENT
+
+# ==========================================
+def displayStudent(student):
+    print("-----------------------------------")
+    print("Student ID: ", student["student_id"])
+    print("Full name: ", student["full_name"])
+    print("Date of birth: ", student["date_of_birth"])
+    print("Gender: ", student["gender"])
+    print("Class name: ", student["class_name"])
+    print("Phone: ", student["phone"])
+    print("Email: ", student["email"])
+    print("Status: ", student["status"])
+    print("-----------------------------------")
+
+
+
+# ==========================================
+
+# 2. INPUT STATUS
+
+# ==========================================
+def inputStatus(message):
+    while True:
+        status = input(message).strip().lower()
+
+        if status == "active":
+            return "Active"
+
+        elif status == "inactive":
+            return "Inactive"
+
+        elif status == "graduated":
+            return "Graduated"
+
+        else:
+            print("Invalid status!")
+            print("Please enter Active, Inactive or Graduated.")
+
+
+
+# ==========================================
+
+# 3. ADD STUDENT
+
+# ==========================================
+def addStudent(student_list):
+
+    
+    while True:
+        student_id = inputStudentID("Enter student ID: ")
+
+        duplicated = False
+
+        
+        for student in student_list:
+            if student["student_id"] == student_id:
+                duplicated = True
+                break
+
+        if duplicated:
+            print("Student ID already exists!")
+            print("Please enter a different ID.")
+
+        else:
+            break
+
+   
+    full_name = inputName("Enter full name: ").strip()
+    date_of_birth = inputDateOfBirth("Enter date of birth (DD/MM/YYYY): ").strip()
+    gender = inputGender("Enter gender: ").strip()
+    class_name = inputClassName("Enter class name: ").strip()
+    phone = inputPhone("Enter phone: ").strip()
+    email = inputEmail("Enter email: ").strip()
+    status = inputStatus("Enter status (Active/Inactive/Graduated): ").strip()
+
+    
+    new_student = {
+        "student_id": student_id,
+        "full_name": full_name,
+        "date_of_birth": date_of_birth,
+        "gender": gender,
+        "class_name": class_name,
+        "phone": phone,
+        "email": email,
+        "status": status}
+
+
+    student_list.append(new_student)
+
+    print("Student added successfully!")
+    return True
+
+
+
+# ==========================================
+
+# 4. UPDATE STUDENT
+
+# ==========================================
+def updateStudent(student_list):
+    
+    student_id = inputStudentID("Enter student ID to update: ")
+
+    
+    if student_id == "":
+        print("Student ID cannot be empty!")
+        return False
+
+    
+    for student in student_list:
+        if student["student_id"] == student_id:
+
+           
+            print("Enter new student information:")
+
+            student["full_name"] = inputName("Enter new full name: ").strip()
+
+            student["date_of_birth"] = inputDateOfBirth("Enter new date of birth (DD/MM/YYYY): ").strip()
+
+            student["gender"] = inputGender("Enter new gender: ").strip()
+
+            student["class_name"] = inputClassName("Enter new class name: ").strip()
+
+            student["phone"] = inputPhone("Enter new phone: ").strip()
+
+            student["email"] = inputEmail("Enter new email: ").strip()
+
+            student["status"] = inputStatus("Enter new status (Active/Inactive/Graduated): ").strip()
+
+            print("Student updated successfully!")
+            return True
+
+    
+    print("Student not found!")
+    return False
+
+
+
+# ==========================================
+
+# 5. FILTER STUDENTS
+
+# ==========================================
+def filterStudents(student_list):
+    filter_condition = input(
+        "Enter class name or status to filter: ").strip().lower()
+
+    
+    if filter_condition == "":
+        print("Filter condition cannot be empty!")
+        return
+
+    found = False
+
+    
+    for student in student_list:
+
+        
+        if (student["class_name"].strip().lower()
+                == filter_condition
+                or student["status"].strip().lower()
+                == filter_condition):
+
+            displayStudent(student)
+            found = True
+
+    
+    if not found:
+        print("No matching students found!")
+
+
+
+# ==========================================
+
+# 6. DISPLAY ACTIVE STUDENTS
+
+# ==========================================
+def displayActiveStudents(student_list):
+    found = False
+
+    
+    for student in student_list:
+
+        
+        if student["status"].strip().lower() == "active":
+            displayStudent(student)
+            found = True
+
+    if not found:
+        print("No active students found!")
+
+
+
+# ==========================================
+
+# 7. DISPLAY ALL STUDENTS
+
+# ==========================================
+def displayAllStudents(student_list):
+    if len(student_list) == 0:
+        print("Student list is empty!")
+
+    else:
+        for student in student_list:
+            displayStudent(student)
+
+
+
+# ==========================================
+
+# 8. MAIN MENU
+
+# ==========================================
+def main():
+    while True:
+        print("\n========== STUDENT MANAGEMENT ==========")
+        print("1. Add student")
+        print("2. Update student")
+        print("3. Filter students")
+        print("4. Display active students")
+        print("5. Display all students")
+        print("0. Exit")
+        print("========================================")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "1":
+            addStudent(student_list)
+
+        elif choice == "2":
+            updateStudent(student_list)
+
+        elif choice == "3":
+            filterStudents(student_list)
+
+        elif choice == "4":
+            displayActiveStudents(student_list)
+
+        elif choice == "5":
+            displayAllStudents(student_list)
+
+        elif choice == "0":
+            print("Goodbye!")
+            break
+
+        else:
+            print("Invalid choice! Please try again.")
+
+
+
+# ==========================================
+
+# RUN PROGRAM
+
+# ==========================================
+
+main()
