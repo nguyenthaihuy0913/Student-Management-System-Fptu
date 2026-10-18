@@ -1,6 +1,12 @@
 # ==========================================
 # STUDENT MANAGEMENT SYSTEM
 # ==========================================
+# Program structure:
+#   1. Input functions   (ask the user and check the data)
+#   2. displayStudent    (print one student)
+#   3. Menu functions    (add, update, filter, display)
+#   4. main()            (the menu loop)
+# ==========================================
 
 from datetime import datetime
 
@@ -65,10 +71,13 @@ def inputDateOfBirth(message):
             print("The date must exist and use DD/MM/YYYY. Example: 28/09/2007")
             continue
 
-        # strptime also accepts "1/1/2000", so check the exact text format
-        if dob.strftime("%d/%m/%Y") != date_of_birth:
-            print("Please use DD/MM/YYYY format! Example: 28/09/2007")
+         # Extra rule: reject unrealistic years such as 1850
+        if dob.year < 1900:
+            print("Year of birth must be 1900 or later!")
 
+        # strptime also accepts "1/1/2000", so check the exact text format
+        elif dob.strftime("%d/%m/%Y") != date_of_birth:
+            print("Please use DD/MM/YYYY format! Example: 28/09/2007")
         elif dob.date() > datetime.today().date():
             print("Date of birth cannot be in the future!")
 
