@@ -427,6 +427,12 @@ def main():
 
 # ==========================================
 # RUN PROGRAM
+# Ctrl+C or Ctrl+D stops the program politely (no error message)
 # ==========================================
 
-main()
+try:
+    main()
+
+except (KeyboardInterrupt, EOFError):
+
+    print("\nProgram stopped. Goodbye!")
