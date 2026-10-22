@@ -1,91 +1,176 @@
-MIN_SCORE = 0.0
-MAX_SCORE = 10.0
-PASS_SCORE = 5.0
+# List to store all course results
+result_list = []
 
-# Simulated database (key: student ID)
-database = {
-    "SV001": {"name": "An", "result": None},
-    "SV002": {"name": "Binh", "result": None},
-}
+# --- EVALUATE COURSE STATUS ---
+def evaluateCourseStatus(grade_fe, grade_re):
+    if grade_fe >= 5.0:
+        return "Pass"
+    elif grade_re is not None and grade_re >= 5.0:
+        return "Pass"
+    else:
+        return "Fail"
 
+# --- 1. ADD COURSE GRADE ---
+def addCourseGrade():
+    print("\n--- ADD COURSE GRADE ---")
+    
+    # Use the teammate's ID validation function
+    student_id = inputStudentID("Enter student ID: ")
 
-def is_valid_score(score):
-    """Score is valid if it is a number and within [0, 10]."""
-    return isinstance(score, (int, float)) and MIN_SCORE <= score <= MAX_SCORE
+    # Check if the student exists in the teammate's student_list
+    student_exists = False
+    for student in student_list:
+        if student["student_id"] == student_id:
+            student_exists = True
+            break
+            
+    if not student_exists:
+        print(f"Error: Student ID {student_id} not found! Please add student first.")
+        return False
 
+    course_id = input("Enter course ID (e.g. PFP191): ").strip().upper()
 
-def read_score(prompt):
-    """Input score, repeat until valid (is a number, 0 <= score <= 10)."""
+    # Check if a grade record for this course already exists
+    for record in result_list:
+        if record["student_id"] == student_id and record["course_id"] == course_id:
+            print("Error: Grade record for this course already exists!")
+            return False
+
+    semester = input("Enter semester (e.g., Fall2026): ").strip()
+    
+    try:
+        credits = int(input("Enter number of credits: "))
+        grade_fe = float(input("Enter Final Exam (FE) grade (0-10): "))
+    except ValueError:
+        print("Error: Credits must be an integer and grade must be a number!")
+        return False
+
+    grade_re = None
+    if grade_fe < 5.0:
+        re_input = input("Enter Re-take Exam (RE) grade (or press Enter to skip): ").strip()
+        if re_input != "":
+            try:
+                grade_re = float(re_input)
+            except ValueError:
+                print("Invalid RE grade. Set to None.")
+
+    result_status = evaluateCourseStatus(grade_fe, grade_re)
+
+    new_record = {
+        "student_id": student_id,
+        "course_id": course_id,
+        "semester": semester,
+        "credits": credits,
+        "grade_fe": grade_fe,
+        "grade_re": grade_re,
+        "result_status": result_status
+    }
+
+    result_list.append(new_record)
+    print(f"Grade added successfully! Final status: {result_status}")
+    return True
+
+# --- 2. UPDATE GRADE OR STATUS ---
+def updateGradeOrStatus():
+    print("\n--- UPDATE GRADE ---")
+    student_id = inputStudentID("Enter student ID to update: ")
+    course_id = input("Enter course ID to update: ").strip().upper()
+
+    found_record = None
+    for record in result_list:
+        if record["student_id"] == student_id and record["course_id"] == course_id:
+            found_record = record
+            break
+
+    if found_record is None:
+        print("Error: Grade record not found!")
+        return False
+
+    try:
+        new_fe = float(input("Enter new Final Exam (FE) grade (0-10): "))
+    except ValueError:
+        print("Error: Grade must be a number!")
+        return False
+
+    new_re = None
+    if new_fe < 5.0:
+        re_input = input("Enter new Re-take Exam (RE) grade (or press Enter to skip): ").strip()
+        if re_input != "":
+            try:
+                new_re = float(re_input)
+            except ValueError:
+                print("Invalid RE grade.")
+    
+    found_record["grade_fe"] = new_fe
+    found_record["grade_re"] = new_re
+    found_record["result_status"] = evaluateCourseStatus(new_fe, new_re)
+    
+    print(f"Grade updated successfully! New status: {found_record['result_status']}")
+    return True
+
+# --- 3. SEARCH ENROLLMENTS ---
+def searchEnrollments():
+    print("\n--- SEARCH ENROLLMENTS ---")
+    student_id = inputStudentID("Enter student ID to search: ")
+    
+    found = False
+    for record in result_list:
+        if record["student_id"] == student_id:
+            if not found:
+                 print(f"Academic records for student {student_id}:")
+            print(f"- Course: {record['course_id']} | FE: {record['grade_fe']} | RE: {record['grade_re']} | Status: {record['result_status']}")
+            found = True
+
+    if not found:
+        print(f"No grade records found for student {student_id}.")
+
+# --- 4. DISPLAY EXAM RESULTS ---
+def displayExamResults():
+    print("\n--- ALL EXAM RESULTS ---")
+    if len(result_list) == 0:
+        print("No exam results available.")
+        return
+
+    for record in result_list:
+        print(f"ID: {record['student_id']} | Course: {record['course_id']} | FE: {record['grade_fe']} | RE: {record['grade_re']} | Status: {record['result_status']}")
+
+# --- 5. DISPLAY PASSED STUDENTS ---
+def displayPassedStudents():
+    print("\n--- PASSED STUDENTS ---")
+    found = False
+    for record in result_list:
+        if record["result_status"] == "Pass":
+            print(f"ID: {record['student_id']} | Course: {record['course_id']} | Status: Pass")
+            found = True
+
+    if not found:
+        print("No passed students found.")
+
+# --- RESULT MANAGEMENT SUB-MENU ---
+def openResultSubMenu():
     while True:
-        raw = input(prompt).strip().replace(",", ".")
-        try:
-            score = float(raw)
-        except ValueError:
-            print(f"Error: '{raw}' is not a number. Please enter again.")
-            continue
+        print("\n========== RESULT MANAGEMENT ==========")
+        print("1. Add course grade")
+        print("2. Update grade or status")
+        print("3. Search enrollments")
+        print("4. Display exam results")
+        print("5. Display passed students")
+        print("0. Return to main menu")
+        print("=======================================")
 
-        # float('nan') and 'inf' are also floats so they must be blocked by the score range
-        if not is_valid_score(score):
-            print(f"Error: score must be between {MIN_SCORE:g} and {MAX_SCORE:g}. Please enter again.")
-            continue
+        choice = input("Enter your choice: ").strip()
 
-        return score
-
-
-def find_database(student_id):
-    """Find Database: returns the record or None if not found."""
-    return database.get(student_id)
-
-
-def process_scores(student_id, attempt_1, get_attempt_2):
-    # Boundary check for attempt 1 (just in case the function is called from elsewhere)
-    if not is_valid_score(attempt_1):
-        raise ValueError(f"Invalid attempt 1 score: {attempt_1}")
-
-    # Start
-    result = "Fail"
-    attempt_2 = None
-
-    # If Attempt_1 >= 5.0
-    if attempt_1 >= PASS_SCORE:
-        result = "Pass"  # Passed immediately, no attempt 2 needed
-    else:
-        # False -> only now is attempt 2 needed
-        attempt_2 = get_attempt_2()
-        if not is_valid_score(attempt_2):
-            raise ValueError(f"Invalid attempt 2 score: {attempt_2}")
-
-        # If Attempt_2 >= 5.0
-        if attempt_2 >= PASS_SCORE:
-            result = "Pass"
+        if choice == "1":
+            addCourseGrade()
+        elif choice == "2":
+            updateGradeOrStatus()
+        elif choice == "3":
+            searchEnrollments()
+        elif choice == "4":
+            displayExamResults()
+        elif choice == "5":
+            displayPassedStudents()
+        elif choice == "0":
+            break
         else:
-            result = "Fail"
-
-    # Find Database
-    record = find_database(student_id)
-
-    # Record not found?
-    if record is None:
-        print("Error: Not registered")
-    else:
-        # Update Database
-        record["result"] = result
-        record["attempt_1"] = attempt_1
-        record["attempt_2"] = attempt_2
-        print("Success: Scores saved")
-
-    # Stop
-    return result
-
-
-if __name__ == "__main__":
-    student_id = input("Enter student ID: ").strip()
-    attempt_1 = read_score("Enter attempt 1 score (0-10): ")
-
-    # Attempt 2 is only asked when attempt 1 < 5.0
-    final = process_scores(
-        student_id,
-        attempt_1,
-        lambda: read_score("Enter attempt 2 score (0-10): "),
-    )
-    print("Result:", final)
+            print("Invalid choice! Please try again.")
