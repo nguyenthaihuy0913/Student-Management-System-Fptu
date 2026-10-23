@@ -455,3 +455,11 @@ def student_sub_menu(student_list):
         else:
             print("Invalid choice! Please try again.")
 
+
+
+# ==========================================
+# RUN PROGRAM
+# ==========================================
+
+main()
+
