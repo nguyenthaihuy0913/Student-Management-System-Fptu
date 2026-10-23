@@ -202,6 +202,45 @@ def inputEmail(message):
         return email
 
 
+
+
+def inputUniquePhone(message, student_list, exclude_student=None):
+    while True:
+        phone = inputPhone(message)
+
+        duplicated = any(
+            student["phone"] == phone
+            and student is not exclude_student
+            for student in student_list
+        )
+
+        if duplicated:
+            print("This phone number already exists! Please enter another phone number.")
+        else:
+            return phone
+
+
+def inputUniqueEmail(message, student_list, exclude_student=None):
+    while True:
+        email = inputEmail(message)
+
+        # Email is optional
+        if email == "":
+            return email
+
+        duplicated = any(
+            student["email"].strip().lower() == email.lower()
+            and student["email"].strip() != ""
+            and student is not exclude_student
+            for student in student_list
+        )
+
+        if duplicated:
+            print("This email already exists! Please enter another email.")
+        else:
+            return email
+
+
 def inputStatus(message):
     while True:
         status = input(message).strip().lower()
@@ -262,8 +301,8 @@ def addStudent(student_list):
     date_of_birth = inputDateOfBirth("Enter date of birth (DD/MM/YYYY): ")
     gender = inputGender("Enter gender (Male/Female): ")
     class_name = inputClassName("Enter class name: ")
-    phone = inputPhone("Enter phone: ")
-    email = inputEmail("Enter email (press Enter to skip): ")
+    phone = inputUniquePhone("Enter phone: ", student_list)
+    email = inputUniqueEmail("Enter email (press Enter to skip): ", student_list)
     status = inputStatus("Enter status (Active/Inactive/Graduated): ")
 
     new_student = {
@@ -308,8 +347,8 @@ def updateStudent(student_list):
     date_of_birth = inputDateOfBirth("Enter new date of birth (DD/MM/YYYY): ")
     gender = inputGender("Enter new gender (Male/Female): ")
     class_name = inputClassName("Enter new class name: ")
-    phone = inputPhone("Enter new phone: ")
-    email = inputEmail("Enter new email: ")
+    phone = inputUniquePhone("Enter new phone: ", student_list, found_student)
+    email = inputUniqueEmail("Enter new email (press Enter to skip): ",student_list,found_student)
     status = inputStatus("Enter new status (Active/Inactive/Graduated): ")
 
     # Then update the existing record (no new record is created)
