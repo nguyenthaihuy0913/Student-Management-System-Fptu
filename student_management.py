@@ -10,7 +10,7 @@
 
 from datetime import datetime
 
-valid_prefixes = ["SE", "SS", "SA", "SB", "DE", "HE"]
+valid_prefixes = ["SE", "SS", "SA", "SB", "DE", "DA", "DS", "HE", "HA", "HS", "QE", "QA", "QS", "CE", "CA", "CS"]
 
 
 # ==========================================
