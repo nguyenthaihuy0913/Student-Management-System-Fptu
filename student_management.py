@@ -412,23 +412,40 @@ def student_sub_menu(student_list):
         print("0. Exit")
         print("========================================")
 
+        
         choice = input("Enter your choice: ").strip()
 
-        if choice == "1":
-            addStudent(student_list)
-        elif choice == "2":
-            updateStudent(student_list)
-        elif choice == "3":
-            filterStudents(student_list)
-        elif choice == "4":
-            displayActiveStudents(student_list)
-        elif choice == "5":
-            displayAllStudents(student_list)
-        elif choice == "0":
-            print("Returning to main menu...")
+        if choice == "0":
+            print("Exiting Student Management System...")
             break
+
+        elif choice in ("1", "2", "3", "4", "5"):
+            confirm = input(
+                "Are you sure you want to select this option? (Y/N): "
+            ).strip().upper()
+
+            if confirm == "N":
+                print("Returning to main menu...")
+                continue
+
+            elif confirm != "Y":
+                print("Invalid confirmation! Returning to main menu.")
+                continue
+
+            if choice == "1":
+                addStudent(student_list)
+            elif choice == "2":
+                updateStudent(student_list)
+            elif choice == "3":
+                filterStudents(student_list)
+            elif choice == "4":
+                displayActiveStudents(student_list)
+            elif choice == "5":
+                displayAllStudents(student_list)
+
         else:
             print("Invalid choice! Please try again.")
+
 
 
 main = student_sub_menu
