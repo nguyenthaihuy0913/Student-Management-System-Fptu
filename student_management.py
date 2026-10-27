@@ -44,12 +44,12 @@ def inputName(message):
 
         check_name = name.replace(" ", "").replace("-", "").replace("'", "").replace("’", "")
 
-        if name != "" and check_name.isalpha() and len(check_name) > 2:
+        if name != "" and check_name.isalpha() and len(check_name) >= 2:
             return name
         else:
             print("Invalid name! Please enter a valid name.")
             print("Use only letters, spaces, hyphens and apostrophes.")
-            print("Full name must contain more than 2 letters.")
+            print("The full name must consist of at least two letters.")
 
 
 def inputDateOfBirth(message):
@@ -237,12 +237,34 @@ def displayStudent(student):
 def addStudent(student_list):
     student_id = inputStudentID("Enter student ID: ")
 
-    duplicated = any(student["student_id"] == student_id for student in student_list)
+    if student_id == "0":
+        print("Returning to main menu...")
+        return False
 
+    # Validate Student ID
+    while True:
+        if len(student_id) == 8 and student_id[:2] in valid_prefixes and student_id[2:].isascii() and student_id[2:].isdigit():
+            break
+
+        print("Invalid Student ID!")
+        student_id = input("Enter student ID (0 to return to main menu): ").strip().upper()
+
+        if student_id == "0":
+            print("Returning to main menu...")
+            return False
+        
+    # Does a student with this ID already exist?
+    for student in student_list:
+        if student["student_id"] == student_id:
+            duplicated = True
+            break
+
+    # YES -> show a message and end (nothing is added)
     if duplicated:
         print("Student ID already exists!")
         return False
 
+    # NO -> collect the other information
     full_name = inputName("Enter full name: ")
     date_of_birth = inputDateOfBirth("Enter date of birth (DD/MM/YYYY): ")
     gender = inputGender("Enter gender (Male/Female): ")
