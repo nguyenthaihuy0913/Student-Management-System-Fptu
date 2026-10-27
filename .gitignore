@@ -1,0 +1,10 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Data files
+*.txt
+
+# Documentation & PDF files
+*.pdf
