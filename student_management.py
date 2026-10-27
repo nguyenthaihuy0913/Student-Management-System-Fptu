@@ -139,10 +139,12 @@ def inputEmail(message):
 
         if not email.isascii():
             print("Invalid email! Use only English letters, digits and symbols.")
+            print("Example: vtgh@gmail.com, vtgh@fpt.edu, ...")
             continue
 
         if email.count("@") != 1:
             print("Invalid email! It must contain exactly one '@'.")
+            print("Example: vtgh@gmail.com, vtgh@fpt.edu, ...")
             continue
 
         if ".." in email:
@@ -155,6 +157,7 @@ def inputEmail(message):
 
         if local == "" or domain == "":
             print("Invalid email! There must be text before and after '@'.")
+            print("Example: vtgh@gmail.com, vtgh@fpt.edu, ...")
             continue
 
         if local.startswith(".") or local.endswith("."):
