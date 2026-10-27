@@ -330,7 +330,7 @@ def addStudent(student_list):
 def updateStudent(student_list):
     student_id = inputStudentID("Enter student ID to update: ")
 
-    # Step 1: search for the student
+    # Step 1: Search for the student
     found_student = None
 
     for student in student_list:
@@ -338,34 +338,67 @@ def updateStudent(student_list):
             found_student = student
             break
 
-    # Step 2: found?  NO -> show a message and end
+    # Step 2: Check whether the student exists
     if found_student is None:
         print("Student not found!")
         return False
 
-    # YES -> read ALL new information first
-    print("Enter new student information (the student ID cannot be changed):")
+    # Step 3: Show the update menu
+    while True:
+        print("\n========== UPDATE STUDENT ==========")
+        print("1. Update full name")
+        print("2. Update date of birth")
+        print("3. Update gender")
+        print("4. Update class name")
+        print("5. Update phone")
+        print("6. Update email")
+        print("7. Update status")
+        print("0. Return to main menu")
+        print("====================================")
 
-    full_name = inputName("Enter new full name: ")
-    date_of_birth = inputDateOfBirth("Enter new date of birth (DD/MM/YYYY): ")
-    gender = inputGender("Enter new gender (Male/Female): ")
-    class_name = inputClassName("Enter new class name: ")
-    phone = inputUniquePhone("Enter new phone: ", student_list, found_student)
-    email = inputUniqueEmail("Enter new email (press Enter to skip): ",student_list,found_student)
-    status = inputStatus("Enter new status (Active/Inactive/Graduated): ")
+        choice = input("Enter your choice: ").strip()
 
-    # Then update the existing record (no new record is created)
-    found_student["full_name"] = full_name
-    found_student["date_of_birth"] = date_of_birth
-    found_student["gender"] = gender
-    found_student["class_name"] = class_name
-    found_student["phone"] = phone
-    found_student["email"] = email
-    found_student["status"] = status
+        if choice == "1":
+            found_student["full_name"] = inputName(
+                "Enter new full name: ")
+            print("Full name updated successfully!")
 
-    print("Student updated successfully!")
-    return True
+        elif choice == "2":
+            found_student["date_of_birth"] = inputDateOfBirth(
+                "Enter new date of birth (DD/MM/YYYY): ")
+            print("Date of birth updated successfully!")
 
+        elif choice == "3":
+            found_student["gender"] = inputGender(
+                "Enter new gender (Male/Female): ")
+            print("Gender updated successfully!")
+
+        elif choice == "4":
+            found_student["class_name"] = inputClassName(
+                "Enter new class name: ")
+            print("Class name updated successfully!")
+
+        elif choice == "5":
+            found_student["phone"] = inputUniquePhone(
+                "Enter new phone: ", student_list, found_student)
+            print("Phone updated successfully!")
+
+        elif choice == "6":
+            found_student["email"] = inputUniqueEmail(
+                "Enter new email: ", student_list, found_student)
+            print("Email updated successfully!")
+
+        elif choice == "7":
+            found_student["status"] = inputStatus(
+                "Enter new status (Active/Inactive/Graduated): ")
+            print("Status updated successfully!")
+
+        elif choice == "0":
+            print("Returning to main menu...")
+            return True
+
+        else:
+            print("Invalid choice! Please try again.")
 
 # ==========================================
 # MENU OPTION 3: FILTER STUDENTS
