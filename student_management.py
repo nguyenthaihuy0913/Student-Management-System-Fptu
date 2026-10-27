@@ -327,8 +327,35 @@ def addStudent(student_list):
 # ==========================================
 # MENU OPTION 2: UPDATE STUDENT
 # ==========================================
+
 def updateStudent(student_list):
-    student_id = inputStudentID("Enter student ID to update: ")
+    while True:
+        print("\n========== UPDATE STUDENT ==========")
+        print("1. Update full name")
+        print("2. Update date of birth")
+        print("3. Update gender")
+        print("4. Update class name")
+        print("5. Update phone")
+        print("6. Update email")
+        print("7. Update status")
+        print("0. Return to main menu")
+        print("====================================")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "0":
+            print("Returning to main menu...")
+            return
+
+        elif choice not in ("1", "2", "3", "4", "5", "6", "7"):
+            print("Invalid choice! Please try again.")
+            continue
+
+        if len(student_list) == 0:
+            print("Student list is empty! Please add a student first.")
+            continue
+
+        student_id = inputStudentID("Enter student ID to update: ")
 
     # Step 1: Search for the student
     found_student = None
@@ -497,5 +524,7 @@ def student_sub_menu(student_list):
 # RUN PROGRAM
 # ==========================================
 
-main()
+student_list = []
+
+student_sub_menu(student_list)
 
