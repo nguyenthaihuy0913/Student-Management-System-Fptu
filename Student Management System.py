@@ -10,8 +10,6 @@
 
 from datetime import datetime
 
-student_list = []
-
 valid_prefixes = ["SE", "SS", "SA", "SB", "DE", "DA", "DS", "HE", "HA", "HS", "QE", "QA", "QS", "CE", "CA", "CS"]
 
 
@@ -105,15 +103,15 @@ def inputClassName(message):
         class_name = input(message).strip().upper()
 
         if (len(class_name) == 6
-                and class_name[:3].isalpha()
-                and class_name[:3].isascii()
-                and class_name[3:].isdigit()
-                and class_name[3:].isascii()):
+                and class_name[:2].isalpha()
+                and class_name[:2].isascii()
+                and class_name[2:].isdigit()
+                and class_name[2:].isascii()):
             return class_name
         else:
             print("Invalid class name!")
-            print("Class name must have 3 letters followed by 3 digits.")
-            print("Example: PFP191, CSI106, MAE101, ...")
+            print("Class name must have 2 letters followed by 4 digits.")
+            print("Example: AI2102, SE1901, IT1902, IA1803, ...")
 
 
 def inputPhone(message):
@@ -134,10 +132,6 @@ def inputEmail(message):
     while True:
         email = input(message).strip()
 
-        # Email is optional, so an empty email is accepted
-        if email == "":
-            return email
-
         # split() cuts the text at any space or tab
         if len(email.split()) != 1:
             print("Invalid email! It must not contain spaces.")
@@ -145,10 +139,12 @@ def inputEmail(message):
 
         if not email.isascii():
             print("Invalid email! Use only English letters, digits and symbols.")
+            print("Example: vtgh@gmail.com, vtgh@fpt.edu, ...")
             continue
 
         if email.count("@") != 1:
             print("Invalid email! It must contain exactly one '@'.")
+            print("Example: vtgh@gmail.com, vtgh@fpt.edu, ...")
             continue
 
         if ".." in email:
@@ -161,6 +157,7 @@ def inputEmail(message):
 
         if local == "" or domain == "":
             print("Invalid email! There must be text before and after '@'.")
+            print("Example: vtgh@gmail.com, vtgh@fpt.edu, ...")
             continue
 
         if local.startswith(".") or local.endswith("."):
@@ -208,6 +205,45 @@ def inputEmail(message):
         return email
 
 
+
+
+def inputUniquePhone(message, student_list, exclude_student=None):
+    while True:
+        phone = inputPhone(message)
+
+        duplicated = any(
+            student["phone"] == phone
+            and student is not exclude_student
+            for student in student_list
+        )
+
+        if duplicated:
+            print("This phone number already exists! Please enter another phone number.")
+        else:
+            return phone
+
+
+def inputUniqueEmail(message, student_list, exclude_student=None):
+    while True:
+        email = inputEmail(message)
+
+        # Email is optional
+        if email == "":
+            return email
+
+        duplicated = any(
+            student["email"].strip().lower() == email.lower()
+            and student["email"].strip() != ""
+            and student is not exclude_student
+            for student in student_list
+        )
+
+        if duplicated:
+            print("This email already exists! Please enter another email.")
+        else:
+            return email
+
+
 def inputStatus(message):
     while True:
         status = input(message).strip().lower()
@@ -231,8 +267,6 @@ def inputStatus(message):
 # ==========================================
 def displayStudent(student):
     email = student["email"]
-    if email == "":
-        email = "(not provided)"
 
     print("-----------------------------------")
     print("Student ID:", student["student_id"])
@@ -270,8 +304,8 @@ def addStudent(student_list):
     date_of_birth = inputDateOfBirth("Enter date of birth (DD/MM/YYYY): ")
     gender = inputGender("Enter gender (Male/Female): ")
     class_name = inputClassName("Enter class name: ")
-    phone = inputPhone("Enter phone: ")
-    email = inputEmail("Enter email (press Enter to skip): ")
+    phone = inputUniquePhone("Enter phone: ", student_list)
+    email = inputUniqueEmail("Enter email (press Enter to skip): ", student_list)
     status = inputStatus("Enter status (Active/Inactive/Graduated): ")
 
     new_student = {
@@ -293,10 +327,37 @@ def addStudent(student_list):
 # ==========================================
 # MENU OPTION 2: UPDATE STUDENT
 # ==========================================
-def updateStudent(student_list):
-    student_id = inputStudentID("Enter student ID to update: ")
 
-    # Step 1: search for the student
+def updateStudent(student_list):
+    while True:
+        print("\n========== UPDATE STUDENT ==========")
+        print("1. Update full name")
+        print("2. Update date of birth")
+        print("3. Update gender")
+        print("4. Update class name")
+        print("5. Update phone")
+        print("6. Update email")
+        print("7. Update status")
+        print("0. Return to main menu")
+        print("====================================")
+
+        choice = input("Enter your choice: ").strip()
+
+        if choice == "0":
+            print("Returning to main menu...")
+            return
+
+        elif choice not in ("1", "2", "3", "4", "5", "6", "7"):
+            print("Invalid choice! Please try again.")
+            continue
+
+        if len(student_list) == 0:
+            print("Student list is empty! Please add a student first.")
+            continue
+
+        student_id = inputStudentID("Enter student ID to update: ")
+
+    # Step 1: Search for the student
     found_student = None
 
     for student in student_list:
@@ -304,34 +365,67 @@ def updateStudent(student_list):
             found_student = student
             break
 
-    # Step 2: found?  NO -> show a message and end
+    # Step 2: Check whether the student exists
     if found_student is None:
         print("Student not found!")
         return False
 
-    # YES -> read ALL new information first
-    print("Enter new student information (the student ID cannot be changed):")
+    # Step 3: Show the update menu
+    while True:
+        print("\n========== UPDATE STUDENT ==========")
+        print("1. Update full name")
+        print("2. Update date of birth")
+        print("3. Update gender")
+        print("4. Update class name")
+        print("5. Update phone")
+        print("6. Update email")
+        print("7. Update status")
+        print("0. Return to main menu")
+        print("====================================")
 
-    full_name = inputName("Enter new full name: ")
-    date_of_birth = inputDateOfBirth("Enter new date of birth (DD/MM/YYYY): ")
-    gender = inputGender("Enter new gender (Male/Female): ")
-    class_name = inputClassName("Enter new class name: ")
-    phone = inputPhone("Enter new phone: ")
-    email = inputEmail("Enter new email (press Enter to skip): ")
-    status = inputStatus("Enter new status (Active/Inactive/Graduated): ")
+        choice = input("Enter your choice: ").strip()
 
-    # Then update the existing record (no new record is created)
-    found_student["full_name"] = full_name
-    found_student["date_of_birth"] = date_of_birth
-    found_student["gender"] = gender
-    found_student["class_name"] = class_name
-    found_student["phone"] = phone
-    found_student["email"] = email
-    found_student["status"] = status
+        if choice == "1":
+            found_student["full_name"] = inputName(
+                "Enter new full name: ")
+            print("Full name updated successfully!")
 
-    print("Student updated successfully!")
-    return True
+        elif choice == "2":
+            found_student["date_of_birth"] = inputDateOfBirth(
+                "Enter new date of birth (DD/MM/YYYY): ")
+            print("Date of birth updated successfully!")
 
+        elif choice == "3":
+            found_student["gender"] = inputGender(
+                "Enter new gender (Male/Female): ")
+            print("Gender updated successfully!")
+
+        elif choice == "4":
+            found_student["class_name"] = inputClassName(
+                "Enter new class name: ")
+            print("Class name updated successfully!")
+
+        elif choice == "5":
+            found_student["phone"] = inputUniquePhone(
+                "Enter new phone: ", student_list, found_student)
+            print("Phone updated successfully!")
+
+        elif choice == "6":
+            found_student["email"] = inputUniqueEmail(
+                "Enter new email: ", student_list, found_student)
+            print("Email updated successfully!")
+
+        elif choice == "7":
+            found_student["status"] = inputStatus(
+                "Enter new status (Active/Inactive/Graduated): ")
+            print("Status updated successfully!")
+
+        elif choice == "0":
+            print("Returning to main menu...")
+            return True
+
+        else:
+            print("Invalid choice! Please try again.")
 
 # ==========================================
 # MENU OPTION 3: FILTER STUDENTS
@@ -389,7 +483,7 @@ def displayAllStudents(student_list):
 # ==========================================
 # MAIN MENU
 # ==========================================
-def main():
+def student_sub_menu(student_list):
     while True:
         print("\n========== STUDENT MANAGEMENT ==========")
         print("1. Add student")
@@ -418,15 +512,19 @@ def main():
             displayAllStudents(student_list)
 
         elif choice == "0":
-            print("Goodbye!")
+            print("Returning to main menu...")
             break
 
         else:
             print("Invalid choice! Please try again.")
 
 
+
 # ==========================================
 # RUN PROGRAM
 # ==========================================
 
-main()
+student_list = []
+
+student_sub_menu(student_list)
+
