@@ -1,0 +1,4 @@
+SE211528|Nguyen Thai Huy|15/09/2005|Male|AI2102|0901234567|huyntse211528@fpt.edu.vn|Active
+SE211681|Tran Vo Hong Ngoc|20/04/2005|Female|AI2102|0912345678|ngoctvhse211681@fpt.edu.vn|Active
+SE211294|Vu Ngoc Anh|10/10/2005|Female|AI2102|0923456789|anhvnse211294@fpt.edu.vn|Inactive
+SE211746|Nguyen Thai Son|05/05/2005|Male|AI2102|0934567890|sonntse211746@fpt.edu.vn|Graduated

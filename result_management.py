@@ -7,12 +7,27 @@ def inputScore(prompt, allow_empty=False):
         if allow_empty and raw == "":
             return None
         try:
-            score = float(raw)
+            score = round(float(raw), 1)
             if 0.0 <= score <= 10.0:
                 return score
             print("[Error] Score must be between 0.0 and 10.0!")
         except ValueError:
             print("[Error] Invalid score! Please enter a valid number.")
+
+
+def inputCourseID(prompt, allow_cancel=False):
+    while True:
+        course_id = input(prompt).strip().upper()
+        if allow_cancel and course_id == "0":
+            return None
+        if not course_id:
+            print("[Error] Course ID cannot be empty!")
+        elif "|" in course_id or " " in course_id:
+            print("[Error] Course ID must not contain spaces or '|'!")
+        elif not (2 <= len(course_id) <= 10 and course_id.isalnum()):
+            print("[Error] Course ID must be 2-10 alphanumeric characters (e.g. PFP191)!")
+        else:
+            return course_id
 
 
 def evaluateCourseStatus(grade_fe, grade_re):
@@ -48,7 +63,10 @@ def displayResult(record):
 
 def addCourseGrade(result_list, student_list):
     print("\n--- ADD COURSE GRADE ---")
-    student_id = inputStudentID("Enter student ID: ")
+    student_id = inputStudentID("Enter student ID (0 to cancel): ", allow_cancel=True)
+    if student_id is None:
+        print("Operation cancelled. Returning to menu...")
+        return False
 
     found_student = None
     for s in student_list:
@@ -64,7 +82,10 @@ def addCourseGrade(result_list, student_list):
         print(f"[Error] Cannot add grade! Student {student_id} is '{found_student['status']}'. Only 'Active' students can take courses.")
         return False
 
-    course_id = input("Enter course ID (e.g. PFP191): ").strip().upper()
+    course_id = inputCourseID("Enter course ID (e.g. PFP191, 0 to cancel): ", allow_cancel=True)
+    if course_id is None:
+        print("Operation cancelled. Returning to menu...")
+        return False
 
     for record in result_list:
         if record["student_id"] == student_id and record["course_id"] == course_id:
@@ -94,7 +115,10 @@ def addCourseGrade(result_list, student_list):
 
 def updateGradeOrStatus(result_list, student_list):
     print("\n--- UPDATE GRADE ---")
-    student_id = inputStudentID("Enter student ID to update: ")
+    student_id = inputStudentID("Enter student ID to update (0 to cancel): ", allow_cancel=True)
+    if student_id is None:
+        print("Operation cancelled. Returning to menu...")
+        return False
 
     found_student = None
     for s in student_list:
@@ -102,11 +126,18 @@ def updateGradeOrStatus(result_list, student_list):
             found_student = s
             break
 
-    if found_student and found_student["status"].lower() == "graduated":
-        print(f"[Error] Cannot update grade! Student {student_id} has already Graduated.")
+    if not found_student:
+        print(f"[Error] Student ID {student_id} not found in student list!")
         return False
 
-    course_id = input("Enter course ID to update: ").strip().upper()
+    if found_student["status"].lower() != "active":
+        print(f"[Error] Cannot update grade! Student {student_id} is '{found_student['status']}'. Only 'Active' students can have grades updated.")
+        return False
+
+    course_id = inputCourseID("Enter course ID to update (0 to cancel): ", allow_cancel=True)
+    if course_id is None:
+        print("Operation cancelled. Returning to menu...")
+        return False
 
     found_record = None
     for record in result_list:
@@ -120,14 +151,19 @@ def updateGradeOrStatus(result_list, student_list):
 
     print(f"[System] Updating grade for Student {student_id} - Course {course_id}:")
     new_fe = inputScore("Enter new Final Exam (FE) grade (0-10): ")
-    new_re = None
+    
+    current_re = found_record.get("grade_re", "")
     if new_fe < 5.0:
         print("[System Info] FE score is below 5.0. Retake Exam (RE) can be entered.")
-        new_re = inputScore("Enter new Re-take Exam (RE) grade (0-10, or press Enter to skip): ", allow_empty=True)
+        re_prompt = f"Enter new Re-take Exam (RE) grade (0-10, or press Enter to keep current [{current_re or 'none'}]): "
+        re_val = inputScore(re_prompt, allow_empty=True)
+        final_re = str(re_val) if re_val is not None else current_re
+    else:
+        final_re = ""
 
     found_record["grade_fe"] = str(new_fe)
-    found_record["grade_re"] = str(new_re) if new_re is not None else ""
-    found_record["result_status"] = evaluateCourseStatus(new_fe, new_re)
+    found_record["grade_re"] = final_re
+    found_record["result_status"] = evaluateCourseStatus(new_fe, final_re)
 
     print(f"[Success] Grade updated successfully! New status: {found_record['result_status']}")
     return True
@@ -135,7 +171,14 @@ def updateGradeOrStatus(result_list, student_list):
 
 def searchEnrollments(result_list):
     print("\n--- SEARCH ENROLLMENTS ---")
-    student_id = inputStudentID("Enter student ID to search: ")
+    if not result_list:
+        print("[Info] No grade records available in the system.")
+        return
+
+    student_id = inputStudentID("Enter student ID to search (0 to cancel): ", allow_cancel=True)
+    if student_id is None:
+        print("Operation cancelled. Returning to menu...")
+        return
 
     found = False
     for record in result_list:
@@ -162,6 +205,10 @@ def displayExamResults(result_list):
 
 def displayPassedStudents(result_list):
     print("\n--- PASSED STUDENTS ---")
+    if not result_list:
+        print("[Info] No exam results available.")
+        return
+
     passed = [r for r in result_list if str(r.get("result_status", "")).strip().lower() == "pass"]
     if not passed:
         print("[Info] No passed students found.")

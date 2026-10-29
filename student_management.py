@@ -1,13 +1,3 @@
-# ==========================================
-# STUDENT MANAGEMENT SYSTEM
-# ==========================================
-# Program structure:
-#   1. Input functions   (ask the user and check the data)
-#   2. displayStudent    (print one student)
-#   3. Menu functions    (add, update, filter, display)
-#   4. student_sub_menu  (the menu loop)
-# ==========================================
-
 from datetime import datetime
 
 valid_prefixes = ["SE", "SS", "SA", "SB", "DE", "DA", "DS", "HE", "HA", "HS", "QE", "QA", "QS", "CE", "CA", "CS"]
@@ -15,12 +5,14 @@ valid_prefixes = ["SE", "SS", "SA", "SB", "DE", "DA", "DS", "HE", "HA", "HS", "Q
 
 # ==========================================
 # INPUT FUNCTIONS
-# Each function repeats the question until the input is valid.
 # ==========================================
 
-def inputStudentID(message):
+def inputStudentID(message, allow_cancel=False):
     while True:
         student_id = input(message).strip().upper()
+
+        if allow_cancel and student_id == "0":
+            return None
 
         if len(student_id) != 8:
             print("Invalid Student ID!")
@@ -40,7 +32,8 @@ def inputStudentID(message):
 
 def inputName(message):
     while True:
-        name = input(message).strip()
+        raw_name = input(message).strip()
+        name = " ".join(raw_name.split()).title()
 
         check_name = name.replace(" ", "").replace("-", "").replace("'", "").replace("’", "")
 
@@ -235,36 +228,21 @@ def displayStudent(student):
 # MENU OPTION 1: ADD STUDENT
 # ==========================================
 def addStudent(student_list):
-    student_id = inputStudentID("Enter student ID: ")
-
-    if student_id == "0":
-        print("Returning to main menu...")
+    student_id = inputStudentID("Enter student ID (0 to cancel): ", allow_cancel=True)
+    if student_id is None:
+        print("Operation cancelled. Returning to menu...")
         return False
 
-    # Validate Student ID
-    while True:
-        if len(student_id) == 8 and student_id[:2] in valid_prefixes and student_id[2:].isascii() and student_id[2:].isdigit():
-            break
-
-        print("Invalid Student ID!")
-        student_id = input("Enter student ID (0 to return to main menu): ").strip().upper()
-
-        if student_id == "0":
-            print("Returning to main menu...")
-            return False
-        
-    # Does a student with this ID already exist?
+    duplicated = False
     for student in student_list:
         if student["student_id"] == student_id:
             duplicated = True
             break
 
-    # YES -> show a message and end (nothing is added)
     if duplicated:
         print("Student ID already exists!")
         return False
 
-    # NO -> collect the other information
     full_name = inputName("Enter full name: ")
     date_of_birth = inputDateOfBirth("Enter date of birth (DD/MM/YYYY): ")
     gender = inputGender("Enter gender (Male/Female): ")
@@ -297,7 +275,10 @@ def updateStudent(student_list):
         print("Student list is empty! Please add a student first.")
         return False
 
-    student_id = inputStudentID("Enter student ID to update: ")
+    student_id = inputStudentID("Enter student ID to update (0 to cancel): ", allow_cancel=True)
+    if student_id is None:
+        print("Operation cancelled. Returning to menu...")
+        return False
 
     found_student = None
     for student in student_list:
@@ -356,7 +337,15 @@ def updateStudent(student_list):
 # MENU OPTION 3: FILTER STUDENTS
 # ==========================================
 def filterStudents(student_list):
-    filter_condition = input("Enter class name or status to filter: ").strip().lower()
+    if len(student_list) == 0:
+        print("Student list is empty! Please add a student first.")
+        return
+
+    filter_condition = input("Enter class name or status to filter (0 to cancel): ").strip().lower()
+
+    if filter_condition == "0":
+        print("Operation cancelled. Returning to menu...")
+        return
 
     if filter_condition == "":
         print("Filter condition cannot be empty!")
@@ -377,6 +366,10 @@ def filterStudents(student_list):
 # MENU OPTION 4: DISPLAY ACTIVE STUDENTS
 # ==========================================
 def displayActiveStudents(student_list):
+    if len(student_list) == 0:
+        print("Student list is empty! Please add a student first.")
+        return
+
     found = False
     for student in student_list:
         if student["status"].lower() == "active":
@@ -392,7 +385,7 @@ def displayActiveStudents(student_list):
 # ==========================================
 def displayAllStudents(student_list):
     if len(student_list) == 0:
-        print("Student list is empty!")
+        print("Student list is empty! Please add a student first.")
     else:
         for student in student_list:
             displayStudent(student)
@@ -409,40 +402,24 @@ def student_sub_menu(student_list):
         print("3. Filter students")
         print("4. Display active students")
         print("5. Display all students")
-        print("0. Exit")
+        print("0. Return to main menu")
         print("========================================")
 
-        
         choice = input("Enter your choice: ").strip()
 
-        if choice == "0":
-            print("Exiting Student Management System...")
+        if choice == "1":
+            addStudent(student_list)
+        elif choice == "2":
+            updateStudent(student_list)
+        elif choice == "3":
+            filterStudents(student_list)
+        elif choice == "4":
+            displayActiveStudents(student_list)
+        elif choice == "5":
+            displayAllStudents(student_list)
+        elif choice == "0":
+            print("Returning to main menu...")
             break
-
-        elif choice in ("1", "2", "3", "4", "5"):
-            confirm = input(
-                "Are you sure you want to select this option? (Y/N): "
-            ).strip().upper()
-
-            if confirm == "N":
-                print("Returning to main menu...")
-                continue
-
-            elif confirm != "Y":
-                print("Invalid confirmation! Returning to main menu.")
-                continue
-
-            if choice == "1":
-                addStudent(student_list)
-            elif choice == "2":
-                updateStudent(student_list)
-            elif choice == "3":
-                filterStudents(student_list)
-            elif choice == "4":
-                displayActiveStudents(student_list)
-            elif choice == "5":
-                displayAllStudents(student_list)
-
         else:
             print("Invalid choice! Please try again.")
 

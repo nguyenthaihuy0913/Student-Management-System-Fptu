@@ -5,6 +5,6 @@ __pycache__/
 
 # Data files
 *.txt
+!students.txt
+!results.txt
 
-# Documentation & PDF files
-*.pdf
