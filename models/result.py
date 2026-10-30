@@ -1,39 +1,56 @@
-"""
-Result Model
-Class representing student course assessment outcomes.
-"""
+from utils.validator import validate_student_id, validate_course_id, validate_text, validate_score, validate_credits
+
 
 
 class Result:
-    """Represents course evaluation grades for a student, auto-evaluating pass/fail status."""
 
-    def __init__(self, student_id, course_id, grade_fe, grade_re=None, result_status=None):
-        self._student_id = student_id
-        self._course_id = course_id
-        self._grade_fe = self._format_grade(grade_fe)
-        self._grade_re = self._format_grade(grade_re)
+    def __init__(
+        self, student_id, course_id, course_name, semester, credits,
+        grade_fe=None, grade_re=None,
+    ):
+        self._student_id = validate_student_id(student_id)
+        self._course_id = validate_course_id(course_id)
+        self.course_name = course_name
+        self.semester = semester
+        self.credits = credits
+        self.grade_fe = grade_fe
+        self.grade_re = grade_re
 
     @staticmethod
     def _format_grade(grade):
-        if grade is None:
-            return ""
-        return str(grade).strip()
+        return validate_score(grade)
+
+    @property
+    def course_name(self):
+        return self._course_name
+
+    @course_name.setter
+    def course_name(self, value):
+        self._course_name = None if value is None else validate_text(value)
+
+    @property
+    def semester(self):
+        return self._semester
+
+    @semester.setter
+    def semester(self, value):
+        self._semester = None if value is None else validate_text(value)
+
+    @property
+    def credits(self):
+        return self._credits
+
+    @credits.setter
+    def credits(self, value):
+        self._credits = None if value is None else validate_credits(value)
 
     @property
     def student_id(self):
         return self._student_id
 
-    @student_id.setter
-    def student_id(self, value):
-        self._student_id = value
-
     @property
     def course_id(self):
         return self._course_id
-
-    @course_id.setter
-    def course_id(self, value):
-        self._course_id = value
 
     @property
     def grade_fe(self):
@@ -51,41 +68,46 @@ class Result:
     def grade_re(self, value):
         self._grade_re = self._format_grade(value)
 
+    @staticmethod
+    def evaluate_status(grade_fe, grade_re=None):
+        fe = Result._format_grade(grade_fe)
+        re = Result._format_grade(grade_re)
+        if fe is None:
+            return None
+        if fe >= 5.0 or (re is not None and re >= 5.0):
+            return "Pass"
+        return "Fail"
+
     @property
     def result_status(self):
-        """
-        Dynamically determine academic status according to FPTU assessment criteria:
-        - Pass: FE >= 5.0 OR (FE < 5.0 and RE >= 5.0)
-        - Fail: FE < 5.0 and (RE is empty or RE < 5.0)
-        """
-        try:
-            fe_val = float(self._grade_fe) if self._grade_fe != "" else 0.0
-            if fe_val >= 5.0:
-                return "Pass"
-
-            if self._grade_re != "":
-                re_val = float(self._grade_re)
-                if re_val >= 5.0:
-                    return "Pass"
-                return "Fail"
-            return "Fail"
-        except (ValueError, TypeError):
-            return "Fail"
+        return self.evaluate_status(self._grade_fe, self._grade_re)
 
     def to_file_line(self):
-        """Format course result data into pipe-delimited text line for file persistence."""
-        return f"{self._student_id}|{self._course_id}|{self._grade_fe}|{self._grade_re}|{self.result_status}\n"
+        fe = "" if self._grade_fe is None else str(self._grade_fe)
+        re = "" if self._grade_re is None else str(self._grade_re)
+        status = self.result_status or ""
+        name = self._course_name or ""
+        semester = self._semester or ""
+        credits = "" if self._credits is None else str(self._credits)
+        return f"{self._student_id}|{self._course_id}|{name}|{semester}|{credits}|{fe}|{re}|{status}\n"
 
     def to_dict(self):
-        """Convert object attributes to dictionary representation."""
         return {
             "student_id": self._student_id,
             "course_id": self._course_id,
+            "course_name": self._course_name,
+            "semester": self._semester,
+            "credits": self._credits,
             "grade_fe": self._grade_fe,
             "grade_re": self._grade_re,
             "result_status": self.result_status,
         }
 
     def __str__(self):
-        re_info = f", RE: {self._grade_re}" if self._grade_re else ""
-        return f"[{self._student_id}] {self._course_id} - FE: {self._grade_fe}{re_info} => {self.result_status}"
+        fe_info = "Chưa có điểm" if self._grade_fe is None else str(self._grade_fe)
+        re_info = f", RE: {self._grade_re}" if self._grade_re is not None else ""
+        status = self.result_status or "Chưa có điểm"
+        name = self._course_name or "[Missing course name]"
+        semester = self._semester or "[Missing semester]"
+        credits = self._credits if self._credits is not None else "?"
+        return f"[{self._student_id}] {self._course_id} - {name} ({semester}, {credits} credits) - FE: {fe_info}{re_info} => {status}"

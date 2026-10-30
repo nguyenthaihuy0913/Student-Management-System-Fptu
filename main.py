@@ -1,67 +1,52 @@
-# =======================================================
-# MODULE: MAIN SYSTEM NAVIGATION & CLI
-# File: main.py
-# =======================================================
+from pathlib import Path
+import file_io
+from services import StudentManager, ResultManager
+from student_management import student_sub_menu
+from result_management import result_sub_menu
 
-import file_io               
-import student_management     
-import result_management      
-
-STUDENTS_FILE = "students.txt"
-RESULTS_FILE = "results.txt"
+BASE_DIR = Path(__file__).resolve().parent
+STUDENTS_FILE = BASE_DIR / "students.txt"
+RESULTS_FILE = BASE_DIR / "results.txt"
 
 
-def display_main_menu():
-    print("\n========================================")
-    print("    STUDENT MANAGEMENT SYSTEM (SMS)     ")
-    print("========================================")
-    print("1. Student Management")
-    print("2. Result Management")
-    print("3. Save and Exit")
-    print("========================================")
+def save_data(students, results):
+    students_ok = file_io.save_records(STUDENTS_FILE, students.students)
+    results_ok = file_io.save_records(RESULTS_FILE, results.results)
+    if students_ok and results_ok:
+        print("Data saved.")
+        return True
+    print("Save failed. Some data may not have been saved.")
+    return False
 
 
 def main():
-    print("[System] Starting the system...")
-
-    student_list = file_io.loadFromFile(STUDENTS_FILE)
-    result_list = file_io.loadResultsFromFile(RESULTS_FILE)
-
-    print(f"[System] Successfully loaded: {len(student_list)} students, {len(result_list)} result records.")
-
     try:
-        while True:
-            display_main_menu()
-            choice = input("Enter your choice (1-3): ").strip()
-
+        students = StudentManager(file_io.load_students(STUDENTS_FILE))
+        results = ResultManager(students, file_io.load_results(RESULTS_FILE))
+    except (OSError, ValueError, UnicodeError) as error:
+        print("[Error] Cannot load data:", error)
+        print("Startup stopped; original files have not been changed.")
+        return
+    print(f"Loaded {len(students.students)} students and {len(results.results)} results.")
+    while True:
+        try:
+            print("\nSTUDENT MANAGEMENT SYSTEM")
+            print("1. Student Management\n2. Result Management\n3. Save and Exit")
+            choice = input("Choice: ").strip()
             if choice == "1":
-                student_management.student_sub_menu(student_list)
-
+                student_sub_menu(students)
             elif choice == "2":
-                result_management.result_sub_menu(result_list, student_list)
-
+                result_sub_menu(results)
             elif choice == "3":
-                print("\n[System] Saving data to the file system...")
-                save_students_ok = file_io.saveToFile(STUDENTS_FILE, student_list)
-                save_results_ok = file_io.saveResultsToFile(RESULTS_FILE, result_list)
-
-                if save_students_ok and save_results_ok:
-                    print("[System] Data has been saved safely!")
-                else:
-                    print("[System Warning] An error occurred during the file writing process!")
-
-                print("Exiting program. Goodbye!")
-                break
-
+                if save_data(students, results):
+                    return
             else:
-                print("[Error] Invalid choice! Please select between 1 and 3.")
-
-    except KeyboardInterrupt:
-        print("\n\n[System Alert] Forced exit detected (Ctrl+C)!")
-        print("[System] Performing emergency data save...")
-        file_io.saveToFile(STUDENTS_FILE, student_list)
-        file_io.saveResultsToFile(RESULTS_FILE, result_list)
-        print("[System] Data saved safely. Exiting program. Goodbye!")
+                print("Invalid choice.")
+        except (KeyboardInterrupt, EOFError):
+            print("\nSaving before exit...")
+            if save_data(students, results):
+                return
+            print("Returning to menu so you can retry saving.")
 
 
 if __name__ == "__main__":

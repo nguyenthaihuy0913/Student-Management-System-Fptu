@@ -1,13 +1,10 @@
-"""
-Student Model
-Subclass of Person representing student-specific academic information.
-"""
+from utils.validator import validate_student_id, validate_class_name, validate_status
+
 
 from models.person import Person
 
 
 class Student(Person):
-    """Represents an enrolled student, inheriting basic demographic details from Person."""
 
     def __init__(
         self,
@@ -21,17 +18,13 @@ class Student(Person):
         status="Active",
     ):
         super().__init__(full_name, date_of_birth, gender, phone, email)
-        self._student_id = student_id
-        self._class_name = class_name
-        self._status = status
+        self._student_id = validate_student_id(student_id)
+        self.class_name = class_name
+        self.status = status
 
     @property
     def student_id(self):
         return self._student_id
-
-    @student_id.setter
-    def student_id(self, value):
-        self._student_id = value
 
     @property
     def class_name(self):
@@ -39,7 +32,7 @@ class Student(Person):
 
     @class_name.setter
     def class_name(self, value):
-        self._class_name = value
+        self._class_name = validate_class_name(value)
 
     @property
     def status(self):
@@ -47,14 +40,12 @@ class Student(Person):
 
     @status.setter
     def status(self, value):
-        self._status = value
+        self._status = validate_status(value)
 
     def to_file_line(self):
-        """Format student data into pipe-delimited text line for file persistence."""
         return f"{self._student_id}|{self._full_name}|{self._date_of_birth}|{self._gender}|{self._class_name}|{self._phone}|{self._email}|{self._status}\n"
 
     def to_dict(self):
-        """Convert object attributes to dictionary representation."""
         return {
             "student_id": self._student_id,
             "full_name": self._full_name,

@@ -1,18 +1,15 @@
-"""
-Person Model
-Base class representing human demographic information.
-"""
+from utils.validator import validate_name, validate_date_of_birth, validate_gender, validate_phone, validate_email
+
 
 
 class Person:
-    """Represents common personal identity attributes."""
 
     def __init__(self, full_name, date_of_birth, gender, phone, email):
-        self._full_name = full_name
-        self._date_of_birth = date_of_birth
-        self._gender = gender
-        self._phone = phone
-        self._email = email
+        self.full_name = full_name
+        self.date_of_birth = date_of_birth
+        self.gender = gender
+        self.phone = phone
+        self.email = email
 
     @property
     def full_name(self):
@@ -20,7 +17,7 @@ class Person:
 
     @full_name.setter
     def full_name(self, value):
-        self._full_name = value
+        self._full_name = validate_name(value)
 
     @property
     def date_of_birth(self):
@@ -28,7 +25,7 @@ class Person:
 
     @date_of_birth.setter
     def date_of_birth(self, value):
-        self._date_of_birth = value
+        self._date_of_birth = validate_date_of_birth(value)
 
     @property
     def gender(self):
@@ -36,7 +33,7 @@ class Person:
 
     @gender.setter
     def gender(self, value):
-        self._gender = value
+        self._gender = validate_gender(value)
 
     @property
     def phone(self):
@@ -44,7 +41,7 @@ class Person:
 
     @phone.setter
     def phone(self, value):
-        self._phone = value
+        self._phone = validate_phone(value)
 
     @property
     def email(self):
@@ -52,7 +49,7 @@ class Person:
 
     @email.setter
     def email(self, value):
-        self._email = value
+        self._email = validate_email(value)
 
     def __str__(self):
         return f"{self._full_name} | {self._date_of_birth} | {self._gender} | {self._phone} | {self._email}"

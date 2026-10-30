@@ -1,106 +1,50 @@
-def loadFromFile(FilePath):
-    dataList = []
-    file = None
+from models import Student, Result
+
+
+def load_students(filepath):
+    students = []
     try:
-        file = open(FilePath, 'r', encoding='utf-8')
-        for line in file:
-            cleaned_line = line.strip()
-            if not cleaned_line:
-                continue
-
-            parts = cleaned_line.split("|")
-            if len(parts) == 8:
-                student = {
-                    "student_id": parts[0].strip(),
-                    "full_name": parts[1].strip(),
-                    "date_of_birth": parts[2].strip(),
-                    "gender": parts[3].strip(),
-                    "class_name": parts[4].strip(),
-                    "phone": parts[5].strip(),
-                    "email": parts[6].strip(),
-                    "status": parts[7].strip()
-                }
-                dataList.append(student)
-
-        print(f"[System] Successfully loaded {len(dataList)} student records from '{FilePath}'.")
-        return dataList
+        with open(filepath, encoding="utf-8") as file:
+            for number, line in enumerate(file, 1):
+                if not line.strip():
+                    continue
+                parts = [part.strip() for part in line.strip().split("|")]
+                if len(parts) != 8:
+                    raise ValueError(f"{filepath}, line {number}: expected 8 student fields.")
+                students.append(Student(*parts))
     except FileNotFoundError:
-        print(f"[System Warning] File '{FilePath}' not found! Initializing empty list.")
-        return []
-    except Exception as e:
-        print(f"[System Error] Error reading file '{FilePath}': {e}")
-        return []
-    finally:
-        if file is not None and not file.closed:
-            file.close()
+        print(f"[Info] {filepath} not found; starting empty.")
+    return students
 
 
-def saveToFile(FilePath, DataList):
-    file = None
+def load_results(filepath):
+    results = []
     try:
-        file = open(FilePath, 'w', encoding='utf-8')
-        for s in DataList:
-            line = f"{s['student_id']}|{s['full_name']}|{s['date_of_birth']}|{s['gender']}|{s['class_name']}|{s['phone']}|{s['email']}|{s['status']}\n"
-            file.write(line)
-        print(f"[System] Successfully saved {len(DataList)} student records to '{FilePath}'.")
-        return True
-    except Exception as e:
-        print(f"[System Error] Error saving file '{FilePath}': {e}")
-        return False
-    finally:
-        if file is not None and not file.closed:
-            file.flush()
-            file.close()
-
-
-def loadResultsFromFile(FilePath):
-    dataList = []
-    file = None
-    try:
-        file = open(FilePath, 'r', encoding='utf-8')
-        for line in file:
-            cleaned_line = line.strip()
-            if not cleaned_line:
-                continue
-
-            parts = cleaned_line.split("|")
-            if len(parts) >= 5:
-                result = {
-                    "student_id": parts[0].strip(),
-                    "course_id": parts[1].strip(),
-                    "grade_fe": parts[2].strip(),
-                    "grade_re": parts[3].strip(),
-                    "result_status": parts[4].strip()
-                }
-                dataList.append(result)
-
-        print(f"[System] Successfully loaded {len(dataList)} result records from '{FilePath}'.")
-        return dataList
+        with open(filepath, encoding="utf-8") as file:
+            for number, line in enumerate(file, 1):
+                if not line.strip():
+                    continue
+                parts = [part.strip() for part in line.strip().split("|")]
+                if len(parts) == 5:
+                    result = Result(parts[0], parts[1], None, None, None, parts[2], parts[3])
+                    print(f"[Info] {parts[0]}/{parts[1]}: old format; course details need completing.")
+                elif len(parts) == 8:
+                    result = Result(parts[0], parts[1], parts[2] or None, parts[3] or None,
+                                    parts[4] or None, parts[5], parts[6])
+                else:
+                    raise ValueError(f"{filepath}, line {number}: expected 5 old or 8 new result fields.")
+                results.append(result)
     except FileNotFoundError:
-        print(f"[System Warning] File '{FilePath}' not found! Initializing empty result list.")
-        return []
-    except Exception as e:
-        print(f"[System Error] Error reading file '{FilePath}': {e}")
-        return []
-    finally:
-        if file is not None and not file.closed:
-            file.close()
+        print(f"[Info] {filepath} not found; starting empty.")
+    return results
 
 
-def saveResultsToFile(FilePath, DataList):
-    file = None
+def save_records(filepath, records):
     try:
-        file = open(FilePath, 'w', encoding='utf-8')
-        for r in DataList:
-            line = f"{r['student_id']}|{r['course_id']}|{r['grade_fe']}|{r['grade_re']}|{r['result_status']}\n"
-            file.write(line)
-
-        print(f"[System] Successfully saved {len(DataList)} result records to '{FilePath}'.")
+        lines = [record.to_file_line() for record in records]
+        with open(filepath, "w", encoding="utf-8") as file:
+            file.writelines(lines)
         return True
-    except Exception as e:
-        print(f"[System Error] Error saving file '{FilePath}': {e}")
+    except (OSError, ValueError) as error:
+        print(f"[Error] Cannot save {filepath}: {error}")
         return False
-    finally:
-        if file is not None and not file.closed:
-            file.flush()
-            file.close()
