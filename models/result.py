@@ -104,9 +104,9 @@ class Result:
         }
 
     def __str__(self):
-        fe_info = "Chưa có điểm" if self._grade_fe is None else str(self._grade_fe)
+        fe_info = "Not graded" if self._grade_fe is None else str(self._grade_fe)
         re_info = f", RE: {self._grade_re}" if self._grade_re is not None else ""
-        status = self.result_status or "Chưa có điểm"
+        status = self.result_status or "Not graded"
         name = self._course_name or "[Missing course name]"
         semester = self._semester or "[Missing semester]"
         credits = self._credits if self._credits is not None else "?"
