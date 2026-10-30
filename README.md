@@ -1,5 +1,7 @@
 # Student Management System (SMS) - FPT University
 
+**English** | [Tiếng Việt](docs/README.vi.md)
+
 A console-based Python project for **PFP191 - Programming Fundamentals with Python**, Topic 4. Class: AI2102. Group: 4. Lecturer: Lê Thị Hồng Nga.
 
 | Student ID | Team member | Responsibilities |
@@ -62,6 +64,7 @@ Student-Management-System-Fptu/
 ├── results.txt               # Academic results
 ├── docs/
 │   ├── README.md             # Documentation index
+│   ├── README.vi.md          # Vietnamese version of this README
 │   ├── PROJECT_PROGRESS.md   # Lab 4/5 progress
 │   ├── references/           # Assignment, guidelines, syllabus, course slides
 │   ├── diagrams/             # PDF diagrams

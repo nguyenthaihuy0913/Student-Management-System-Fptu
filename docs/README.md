@@ -1,6 +1,6 @@
 # Tài liệu dự án PFP191
 
-[Quay lại README dự án](../README.md)
+[README dự án (English)](../README.md) | [README tiếng Việt](README.vi.md)
 
 | Thư mục / file | Nội dung |
 | --- | --- |
